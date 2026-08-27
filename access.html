@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ECHO//NULL — ACCESS</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="scanlines"></div>
+
+<main class="access-panel">
+
+    <div class="access-title">
+        ECHO<span>//</span>NULL
+    </div>
+
+    <p class="muted">
+        RESTRICTED SYSTEM
+    </p>
+
+    <br>
+
+    <p>
+        MEMORY SECTOR 07
+    </p>
+
+    <p class="warning">
+        AUTHORIZATION REQUIRED
+    </p>
+
+    <div class="access-box">
+
+        <input
+            id="password"
+            type="password"
+            placeholder="ACCESS CODE"
+            autocomplete="off"
+        >
+
+        <button onclick="attemptAccess()">
+            AUTHENTICATE
+        </button>
+
+    </div>
+
+    <p id="accessMessage"></p>
+
+    <br>
+
+    <a href="index.html">
+        ← RETURN
+    </a>
+
+</main>
+
+<script src="access.js"></script>
+
+</body>
+</html>

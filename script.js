@@ -3,198 +3,687 @@ const input = document.getElementById("commandInput");
 const screen = document.getElementById("screen");
 const glitch = document.getElementById("glitch");
 
-const commandHistory = [];
+
+const history = [];
+
 let historyIndex = -1;
 
-const commands = {
 
-    help: () => `
-        <div class="command-result">
-            <p>AVAILABLE COMMANDS</p>
-            <br>
-            <p><span class="command">help</span> &nbsp;&nbsp;&nbsp; show this message</p>
-            <p><span class="command">scan</span> &nbsp;&nbsp;&nbsp; scan the system</p>
-            <p><span class="command">echo</span> &nbsp;&nbsp;&nbsp; repeat a message</p>
-            <p><span class="command">memory</span> &nbsp; access memory sectors</p>
-            <p><span class="command">status</span> &nbsp;&nbsp; system status</p>
-            <p><span class="command">clear</span> &nbsp;&nbsp;&nbsp; clear terminal</p>
-        </div>
-    `,
+/* =========================
+   PLAYER MEMORY
+========================= */
 
-    scan: () => `
-        <div class="command-result">
-            <p>Scanning...</p>
-            <p>[████████████████████] 100%</p>
-            <br>
-            <p>Network ........ ONLINE</p>
-            <p>Memory ........ 73% CORRUPTED</p>
-            <p>Unknown file .. DETECTED</p>
-            <p>Location ...... /memory/sector_07</p>
-        </div>
-    `,
+let state = JSON.parse(
+    localStorage.getItem("echoNullState")
+) || {
 
-    status: () => `
-        <div class="command-result">
-            <p>SYSTEM STATUS</p>
-            <br>
-            <p>Core .............. STABLE</p>
-            <p>Memory ............ UNSTABLE</p>
-            <p>Connection ........ SECURE</p>
-            <p>Unknown Process .. RUNNING</p>
-        </div>
-    `,
+    scans: 0,
 
-    memory: () => `
-        <div class="command-result">
-            <p>MEMORY ACCESS</p>
-            <br>
-            <p>Sector 01 ......... OK</p>
-            <p>Sector 02 ......... OK</p>
-            <p>Sector 03 ......... OK</p>
-            <p>Sector 04 ......... OK</p>
-            <p>Sector 05 ......... CORRUPTED</p>
-            <p>Sector 06 ......... CORRUPTED</p>
-            <p>Sector 07 ......... <span class="secret">LOCKED</span></p>
-        </div>
-    `,
+    memory: false,
 
-    clear: () => {
-        screen.innerHTML = "";
-        return null;
-    },
+    identity: false,
 
-    echo: (args) => {
-        if (!args) {
-            return `
-                <div class="command-result error">
-                    Usage: echo [message]
-                </div>
-            `;
-        }
+    wake: false,
 
-        return `
-            <div class="command-result">
-                ${escapeHTML(args)}
-            </div>
-        `;
-    }
+    unlocked: false,
+
+    voidFound: false,
+
+    ending: null
+
 };
 
 
-/* Submit command */
+function saveState() {
 
-form.addEventListener("submit", function(event) {
+    localStorage.setItem(
+        "echoNullState",
+        JSON.stringify(state)
+    );
 
-    event.preventDefault();
-
-    const rawCommand = input.value.trim();
-
-    if (!rawCommand) return;
-
-    commandHistory.push(rawCommand);
-    historyIndex = commandHistory.length;
-
-    processCommand(rawCommand);
-
-    input.value = "";
-
-});
+}
 
 
-/* Process commands */
+/* =========================
+   COMMANDS
+========================= */
 
-function processCommand(rawCommand) {
+const commands = {
 
-    const parts = rawCommand.split(" ");
-    const command = parts[0].toLowerCase();
-    const args = parts.slice(1).join(" ");
 
-    addCommandLine(rawCommand);
+    help: () => `
 
-    /* Secret command */
+        <div class="command-result">
+
+            <p>AVAILABLE COMMANDS</p>
+
+            <br>
+
+            <p>
+                <span class="command">help</span>
+                — command list
+            </p>
+
+            <p>
+                <span class="command">scan</span>
+                — scan system
+            </p>
+
+            <p>
+                <span class="command">status</span>
+                — system status
+            </p>
+
+            <p>
+                <span class="command">memory</span>
+                — inspect memory
+            </p>
+
+            <p>
+                <span class="command">logs</span>
+                — view system logs
+            </p>
+
+            <p>
+                <span class="command">echo</span>
+                — repeat a message
+            </p>
+
+            <p>
+                <span class="command">clear</span>
+                — clear terminal
+            </p>
+
+        </div>
+
+    `,
+
+
+    scan: () => {
+
+        state.scans++;
+
+        saveState();
+
+
+        let message = `
+
+            <div class="command-result">
+
+                <p>SCANNING SYSTEM...</p>
+
+                <p>
+                    [████████████████████] 100%
+                </p>
+
+                <br>
+
+                <p>
+                    NETWORK ........ ONLINE
+                </p>
+
+                <p>
+                    CORE ........... STABLE
+                </p>
+
+                <p>
+                    MEMORY ......... ${state.scans > 2
+                        ? "CRITICAL"
+                        : "73% CORRUPTED"}
+                </p>
+
+                <p>
+                    UNKNOWN FILE ... DETECTED
+                </p>
+
+                <p>
+                    LOCATION ....... /memory/sector_07
+                </p>
+
+            </div>
+
+        `;
+
+
+        if (state.scans >= 3) {
+
+            message += `
+
+                <div class="secret">
+
+                    <p>
+                        SCAN RESULT CHANGED.
+                    </p>
+
+                    <p>
+                        SOMETHING IS SCANNING YOU BACK.
+                    </p>
+
+                </div>
+
+            `;
+
+            activateGlitch();
+
+        }
+
+
+        return message;
+
+    },
+
+
+    status: () => `
+
+        <div class="command-result">
+
+            <p>SYSTEM STATUS</p>
+
+            <br>
+
+            <p>
+                CORE .............. STABLE
+            </p>
+
+            <p>
+                MEMORY ............ UNSTABLE
+            </p>
+
+            <p>
+                CONNECTION ........ SECURE
+            </p>
+
+            <p>
+                UNKNOWN PROCESS ... RUNNING
+            </p>
+
+            <p>
+                OBSERVER .......... ${state.identity
+                    ? "DETECTED"
+                    : "UNKNOWN"}
+            </p>
+
+        </div>
+
+    `,
+
+
+    memory: () => {
+
+        state.memory = true;
+
+        saveState();
+
+
+        return `
+
+            <div class="command-result">
+
+                <p>MEMORY SECTORS</p>
+
+                <br>
+
+                <p>
+                    Sector 01 ......... OK
+                </p>
+
+                <p>
+                    Sector 02 ......... OK
+                </p>
+
+                <p>
+                    Sector 03 ......... OK
+                </p>
+
+                <p>
+                    Sector 04 ......... OK
+                </p>
+
+                <p>
+                    Sector 05 ......... CORRUPTED
+                </p>
+
+                <p>
+                    Sector 06 ......... CORRUPTED
+                </p>
+
+                <p>
+                    Sector 07 .........
+                    <span class="secret">
+                        LOCKED
+                    </span>
+                </p>
+
+                <br>
+
+                <p>
+                    Hint:
+                    something has been left behind.
+                </p>
+
+            </div>
+
+        `;
+
+    },
+
+
+    logs: () => `
+
+        <div class="command-result">
+
+            <p>SYSTEM LOG</p>
+
+            <br>
+
+            <p>
+                [00:00:01] BOOT
+            </p>
+
+            <p>
+                [00:00:03] MEMORY INITIALIZED
+            </p>
+
+            <p>
+                [00:00:07] USER CONNECTED
+            </p>
+
+            <p>
+                [00:00:11] UNKNOWN PROCESS
+            </p>
+
+            <p>
+                [00:00:19] ECHO DETECTED
+            </p>
+
+            <p>
+                [00:00:23] ECHO RESPONDED
+            </p>
+
+            <p class="warning">
+                [00:00:27] LOGGING DISABLED
+            </p>
+
+        </div>
+
+    `,
+
+
+    echo: (args) => {
+
+        if (!args) {
+
+            return `
+
+                <div class="error">
+
+                    Usage:
+                    echo [message]
+
+                </div>
+
+            `;
+
+        }
+
+
+        return `
+
+            <div class="command-result">
+
+                ${escapeHTML(args)}
+
+            </div>
+
+        `;
+
+    },
+
+
+    clear: () => {
+
+        screen.innerHTML = "";
+
+        return null;
+
+    }
+
+};
+
+
+/* =========================
+   FORM
+========================= */
+
+form.addEventListener(
+    "submit",
+    function(event) {
+
+        event.preventDefault();
+
+
+        const raw = input.value.trim();
+
+
+        if (!raw) {
+            return;
+        }
+
+
+        history.push(raw);
+
+        historyIndex = history.length;
+
+
+        processCommand(raw);
+
+
+        input.value = "";
+
+    }
+);
+
+
+/* =========================
+   PROCESS
+========================= */
+
+function processCommand(raw) {
+
+    const parts = raw.split(" ");
+
+    const command =
+        parts[0].toLowerCase();
+
+    const args =
+        parts.slice(1).join(" ");
+
+
+    addCommandLine(raw);
+
+
+    /* WAKE */
 
     if (command === "wake") {
 
+        state.wake = true;
+
+        saveState();
+
         activateGlitch();
 
+
         addOutput(`
+
             <div class="secret">
+
                 <p>...</p>
-                <p>YOU SHOULDN'T HAVE FOUND THIS.</p>
+
+                <p>
+                    YOU SHOULDN'T HAVE FOUND THIS.
+                </p>
+
                 <br>
-                <p>THE SYSTEM REMEMBERS YOU.</p>
-                <p>ACCESS CODE: 07-19-NULL</p>
+
+                <p>
+                    THE SYSTEM REMEMBERS YOU.
+                </p>
+
+                <p>
+                    ACCESS CODE:
+                    07-19-NULL
+                </p>
+
             </div>
+
         `);
 
         return;
+
     }
+
+
+    /* WHOAMI */
 
     if (command === "whoami") {
 
-        addOutput(`
-            <div class="secret">
-                <p>IDENTITY UNKNOWN.</p>
-                <p>SESSION OWNER: [REDACTED]</p>
-            </div>
-        `);
+        state.identity = true;
+
+        saveState();
 
         activateGlitch();
 
+
+        addOutput(`
+
+            <div class="secret">
+
+                <p>
+                    IDENTITY UNKNOWN.
+                </p>
+
+                <p>
+                    SESSION OWNER: [REDACTED]
+                </p>
+
+                <br>
+
+                <p>
+                    WAIT...
+                </p>
+
+                <p>
+                    SESSION OWNER:
+                    YOU
+                </p>
+
+            </div>
+
+        `);
+
         return;
+
     }
+
+
+    /* UNLOCK */
 
     if (command === "unlock") {
 
         if (args === "07-19-NULL") {
 
+            state.unlocked = true;
+
+            saveState();
+
             activateGlitch();
 
+
             addOutput(`
+
                 <div class="success">
-                    <p>ACCESS GRANTED.</p>
+
+                    <p>
+                        ACCESS GRANTED.
+                    </p>
+
                     <br>
-                    <p>MEMORY SECTOR 07 UNLOCKED.</p>
-                    <p>FILE: <span class="secret">THE_FIRST_ECHO</span></p>
+
+                    <p>
+                        MEMORY SECTOR 07 UNLOCKED.
+                    </p>
+
+                    <p>
+                        FILE:
+                        <span class="secret">
+                            THE_FIRST_ECHO
+                        </span>
+                    </p>
+
                     <br>
+
                     <p class="secret">
                         "It wasn't supposed to remember."
                     </p>
+
+                    <br>
+
+                    <p>
+                        ACCESS:
+                        <a href="memory.html">
+                            OPEN MEMORY
+                        </a>
+                    </p>
+
                 </div>
+
             `);
 
-        } else {
+        }
+
+        else {
 
             addOutput(`
+
                 <div class="error">
+
                     ACCESS DENIED.
+
                 </div>
+
             `);
 
         }
 
         return;
+
     }
 
 
-    /* Normal commands */
+    /* VOID */
+
+    if (command === "null") {
+
+        if (
+            state.unlocked &&
+            state.identity &&
+            state.wake
+        ) {
+
+            state.voidFound = true;
+
+            saveState();
+
+            activateGlitch();
+
+
+            addOutput(`
+
+                <div class="secret">
+
+                    <p>
+                        NULL ROUTE FOUND.
+                    </p>
+
+                    <p>
+                        /void/
+                    </p>
+
+                    <br>
+
+                    <a href="void.html">
+                        ENTER THE VOID
+                    </a>
+
+                </div>
+
+            `);
+
+        }
+
+        else {
+
+            addOutput(`
+
+                <div class="error">
+
+                    ROUTE DOES NOT EXIST.
+
+                </div>
+
+            `);
+
+        }
+
+        return;
+
+    }
+
+
+    /* END */
+
+    if (command === "end") {
+
+        if (state.voidFound) {
+
+            showEnding();
+
+        }
+
+        else {
+
+            addOutput(`
+
+                <div class="error">
+
+                    ENDING NOT AVAILABLE.
+
+                </div>
+
+            `);
+
+        }
+
+        return;
+
+    }
+
+
+    /* NORMAL */
 
     if (commands[command]) {
 
-        const result = commands[command](args);
+        const result =
+            commands[command](args);
+
 
         if (result) {
+
             addOutput(result);
+
         }
 
-    } else {
+    }
+
+    else {
 
         addOutput(`
+
             <div class="error">
-                Command not found: ${escapeHTML(command)}
+
+                Command not found:
+                ${escapeHTML(command)}
+
                 <br>
-                Type <span class="command">help</span> for available commands.
+
+                Type
+                <span class="command">
+                    help
+                </span>
+                for assistance.
+
             </div>
+
         `);
 
     }
@@ -202,122 +691,231 @@ function processCommand(rawCommand) {
 }
 
 
-/* Add command line */
+/* =========================
+   ENDINGS
+========================= */
+
+function showEnding() {
+
+    state.ending = "observer";
+
+    saveState();
+
+    activateGlitch();
+
+
+    addOutput(`
+
+        <div class="secret">
+
+            <p>
+                ENDING // THE OBSERVER
+            </p>
+
+            <br>
+
+            <p>
+                You thought you were investigating
+                ECHO//NULL.
+            </p>
+
+            <p>
+                You were wrong.
+            </p>
+
+            <br>
+
+            <p>
+                ECHO//NULL was investigating you.
+            </p>
+
+            <br>
+
+            <p>
+                SESSION TERMINATED.
+            </p>
+
+        </div>
+
+    `);
+
+}
+
+
+/* =========================
+   OUTPUT
+========================= */
 
 function addCommandLine(command) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
+
 
     div.className = "output";
 
+
     div.innerHTML = `
+
         <div class="command-line">
-            guest@echo-null:~$ ${escapeHTML(command)}
+
+            guest@echo-null:~$
+            ${escapeHTML(command)}
+
         </div>
+
     `;
+
 
     screen.appendChild(div);
 
+
     scrollToBottom();
+
 }
 
-
-/* Add output */
 
 function addOutput(html) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
+
 
     div.className = "output";
 
+
     div.innerHTML = html;
+
 
     screen.appendChild(div);
 
+
     scrollToBottom();
+
 }
 
-
-/* Scroll */
 
 function scrollToBottom() {
 
-    screen.scrollTop = screen.scrollHeight;
+    screen.scrollTop =
+        screen.scrollHeight;
 
 }
 
 
-/* Keyboard history */
+/* =========================
+   HISTORY
+========================= */
 
-input.addEventListener("keydown", function(event) {
-
-    if (event.key === "ArrowUp") {
-
-        if (commandHistory.length === 0) return;
-
-        historyIndex--;
-
-        if (historyIndex < 0) {
-            historyIndex = 0;
-        }
-
-        input.value = commandHistory[historyIndex];
-
-    }
+input.addEventListener(
+    "keydown",
+    function(event) {
 
 
-    if (event.key === "ArrowDown") {
+        if (event.key === "ArrowUp") {
 
-        if (commandHistory.length === 0) return;
+            if (!history.length) {
+                return;
+            }
 
-        historyIndex++;
 
-        if (historyIndex >= commandHistory.length) {
+            historyIndex--;
 
-            historyIndex = commandHistory.length;
-            input.value = "";
 
-        } else {
+            if (historyIndex < 0) {
+                historyIndex = 0;
+            }
 
-            input.value = commandHistory[historyIndex];
+
+            input.value =
+                history[historyIndex];
 
         }
 
+
+        if (event.key === "ArrowDown") {
+
+            if (!history.length) {
+                return;
+            }
+
+
+            historyIndex++;
+
+
+            if (
+                historyIndex >=
+                history.length
+            ) {
+
+                historyIndex =
+                    history.length;
+
+                input.value = "";
+
+            }
+
+            else {
+
+                input.value =
+                    history[historyIndex];
+
+            }
+
+        }
+
     }
+);
 
-});
 
-
-/* Glitch effect */
+/* =========================
+   GLITCH
+========================= */
 
 function activateGlitch() {
 
-    glitch.classList.remove("glitch-active");
+    glitch.classList.remove(
+        "glitch-active"
+    );
+
 
     void glitch.offsetWidth;
 
-    glitch.classList.add("glitch-active");
+
+    glitch.classList.add(
+        "glitch-active"
+    );
 
 }
 
 
-/* Prevent HTML injection */
+/* =========================
+   SECURITY
+========================= */
 
 function escapeHTML(text) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
+
 
     div.textContent = text;
+
 
     return div.innerHTML;
 
 }
 
 
-/* Keep input focused */
+/* =========================
+   FOCUS
+========================= */
 
-document.addEventListener("click", function() {
+document.addEventListener(
+    "click",
+    function() {
 
-    input.focus();
+        input.focus();
 
-});
+    }
+);
