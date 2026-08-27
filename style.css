@@ -1,0 +1,312 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at center, #101820 0%, #050709 55%, #020304 100%);
+    color: #d9faff;
+    font-family: "Share Tech Mono", monospace;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+}
+
+/* Main terminal */
+
+.terminal {
+    width: min(1000px, 92vw);
+    height: min(700px, 88vh);
+
+    background: rgba(3, 8, 11, 0.94);
+
+    border: 1px solid #31525b;
+    border-radius: 10px;
+
+    box-shadow:
+        0 0 30px rgba(0, 220, 255, 0.08),
+        inset 0 0 40px rgba(0, 0, 0, 0.8);
+
+    display: flex;
+    flex-direction: column;
+
+    position: relative;
+    z-index: 2;
+
+    overflow: hidden;
+}
+
+/* Header */
+
+.terminal-header {
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 22px;
+
+    background: rgba(10, 20, 24, 0.9);
+    border-bottom: 1px solid #263f46;
+}
+
+.title {
+    font-size: 20px;
+    letter-spacing: 4px;
+    color: #dffcff;
+    text-shadow: 0 0 12px rgba(0, 220, 255, 0.5);
+}
+
+.title span {
+    color: #52d9e8;
+}
+
+.version {
+    color: #5d747b;
+    font-size: 13px;
+}
+
+.status {
+    color: #67e8a5;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #67e8a5;
+    box-shadow: 0 0 10px #67e8a5;
+
+    animation: pulse 1.8s infinite;
+}
+
+/* Screen */
+
+.screen {
+    flex: 1;
+    padding: 30px;
+
+    overflow-y: auto;
+
+    line-height: 1.7;
+    font-size: 15px;
+
+    scrollbar-width: thin;
+    scrollbar-color: #28464d transparent;
+}
+
+.screen::-webkit-scrollbar {
+    width: 5px;
+}
+
+.screen::-webkit-scrollbar-thumb {
+    background: #28464d;
+}
+
+.boot {
+    color: #a9c6cc;
+}
+
+.warning {
+    color: #ffcc66;
+}
+
+.command {
+    color: #68e3f0;
+}
+
+/* Output */
+
+.output {
+    margin-bottom: 18px;
+}
+
+.command-line {
+    color: #6ee7f2;
+}
+
+.command-result {
+    margin-top: 5px;
+    color: #b8cdd1;
+}
+
+.error {
+    color: #ff6b6b;
+}
+
+.success {
+    color: #69e6a0;
+}
+
+.secret {
+    color: #d9a7ff;
+    text-shadow: 0 0 10px rgba(200, 120, 255, 0.4);
+}
+
+/* Input */
+
+.input-area {
+    min-height: 62px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 22px;
+
+    border-top: 1px solid #263f46;
+    background: rgba(5, 12, 15, 0.95);
+}
+
+.prompt {
+    color: #69e6a0;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+#commandInput {
+    flex: 1;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #e4fbff;
+    font-family: inherit;
+    font-size: 15px;
+
+    caret-color: #69e6a0;
+}
+
+/* Scanlines */
+
+.scanlines {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.015) 0px,
+            rgba(255, 255, 255, 0.015) 1px,
+            transparent 1px,
+            transparent 4px
+        );
+
+    z-index: 10;
+}
+
+/* Glitch */
+
+#glitch {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            transparent 0px,
+            transparent 3px,
+            rgba(0, 255, 255, 0.04) 4px
+        );
+
+    z-index: 20;
+}
+
+.glitch-active {
+    animation: glitch 0.35s;
+}
+
+/* Animations */
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
+@keyframes glitch {
+
+    0% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translate(-3px, 2px);
+    }
+
+    40% {
+        opacity: 0.5;
+        transform: translate(3px, -2px);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translate(-2px, 0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 650px) {
+
+    .terminal {
+        width: 96vw;
+        height: 92vh;
+    }
+
+    .terminal-header {
+        padding: 0 12px;
+    }
+
+    .title {
+        font-size: 16px;
+        letter-spacing: 2px;
+    }
+
+    .version {
+        display: none;
+    }
+
+    .screen {
+        padding: 18px;
+        font-size: 13px;
+    }
+
+    .input-area {
+        padding: 0 12px;
+    }
+
+    .prompt {
+        font-size: 12px;
+    }
+}

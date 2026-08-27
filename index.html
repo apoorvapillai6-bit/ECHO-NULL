@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECHO//NULL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="scanlines"></div>
+
+    <main class="terminal">
+
+        <header class="terminal-header">
+            <div class="status">
+                <span class="status-dot"></span>
+                SYSTEM ONLINE
+            </div>
+
+            <div class="title">ECHO<span>//</span>NULL</div>
+
+            <div class="version">v0.1.7</div>
+        </header>
+
+        <section class="screen" id="screen">
+
+            <div class="boot">
+                <p>INITIALIZING ECHO//NULL...</p>
+                <p>Loading memory sectors...</p>
+                <p>Checking system integrity...</p>
+                <p class="warning">WARNING: MEMORY CORRUPTION DETECTED</p>
+                <p>Connection established.</p>
+                <br>
+                <p>Type <span class="command">help</span> to see available commands.</p>
+            </div>
+
+        </section>
+
+        <form id="terminalForm" class="input-area">
+            <span class="prompt">guest@echo-null:~$</span>
+
+            <input
+                type="text"
+                id="commandInput"
+                autocomplete="off"
+                spellcheck="false"
+                autofocus
+            >
+        </form>
+
+    </main>
+
+    <div id="glitch"></div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
